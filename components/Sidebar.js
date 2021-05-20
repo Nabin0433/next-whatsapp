@@ -78,7 +78,7 @@ const Container = styled.div`
   --ms-overflow-style: none;
   scrollbar-width: none;
 
-  @media only screen and (min-width: 800px) {
+  @media only screen and (max-width: 800px) {
     min-width: 50px;
     max-width: 150px;
     font-size: 7px;
