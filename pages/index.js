@@ -1,13 +1,13 @@
 import React from "react";
-import Head from "next/Head";
+// import Head from "next/Head";
 import Sidebar from "../components/Sidebar";
 function index() {
   return (
     <div>
-      <Head>
+      {/* <Head>
         <title>React and Next app</title>
         <link rel="favicon" href="../public/favicon.ico" />
-      </Head>
+      </Head> */}
       <Sidebar />
     </div>
   );
