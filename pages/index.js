@@ -1,5 +1,5 @@
 import React from "react";
-import Head from "next/head";
+import Head from "next/Head";
 import Sidebar from "../components/Sidebar";
 function index() {
   return (
