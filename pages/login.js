@@ -1,5 +1,5 @@
 import { Button } from "@material-ui/core";
-// import Head from "next/Head";
+import Head from "next/head";
 import styled from "styled-components";
 import { auth, provider } from "../helpers/firebase";
 
@@ -10,9 +10,9 @@ const Login = () => {
 
   return (
     <Container>
-      {/* <Head>
+      <Head>
         <title>Watsapp Login</title>
-      </Head> */}
+      </Head>
       <LoginContainer>
         <Logo
           src="https://assets.stickpng.com/images/580b57fcd9996e24bc43c543.png"

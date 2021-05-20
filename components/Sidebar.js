@@ -68,7 +68,7 @@ const Container = styled.div`
   flex: 0.45;
   border-right: 1px solid whitesmoke;
   height: 100vh;
-  min-width: 250px;
+  min-width: 200px;
   max-width: 300px;
   overflow-y: scroll;
 
@@ -77,6 +77,12 @@ const Container = styled.div`
   }
   --ms-overflow-style: none;
   scrollbar-width: none;
+
+  @media only screen and (min-width: 800px) {
+    min-width: 50px;
+    max-width: 150px;
+    font-size: 7px;
+  }
 `;
 
 const Header = styled.div`
