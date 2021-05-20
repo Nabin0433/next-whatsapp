@@ -1,13 +1,11 @@
 {
   "name": "whatsapp2.o",
   "version": "0.1.0",
-  "main": "server.js",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "deploy": "firebase deploy --only functions,hosting"
+    "start": "next start"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.3",
