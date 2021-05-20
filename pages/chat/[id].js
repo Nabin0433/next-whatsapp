@@ -7,6 +7,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import getRecipientEmail from "../../helpers/getRecipientEmail";
 
 const Chat = ({ chat, messages }) => {
+
   const [user] = useAuthState(auth);
   return (
     <Container>
@@ -15,7 +16,7 @@ const Chat = ({ chat, messages }) => {
       </Head>
       <Sidebar />
       <ChatContainer>
-        <ChatScreen chats={chat} message={messages} />
+        <ChatScreen chat={chat} messages={messages} />
       </ChatContainer>
     </Container>
   );
@@ -25,29 +26,32 @@ export default Chat;
 
 export async function getServerSideProps(context) {
   const ref = db.collection("chats").doc(context.query.id);
+
   const messageRes = await ref
     .collection("messages")
-    .orderBy("timestamp", "asc")
+    .orderBy("lastSeen", "asc")
     .get();
 
   const messages = messageRes.docs
-    .map((doc) => ({
+    ?.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }))
     .map((messages) => ({
       ...messages,
-      timestamp: messages.timestamp.toDate().getTime(),
+      timestamp: messages.timestamp?.toDate().getTime(),
     }));
+
   const chatsRes = await ref.get();
   const chat = {
     id: chatsRes.id,
     ...chatsRes.data(),
   };
+
   return {
     props: {
       messages: JSON.stringify(messages),
-      chat,
+      chat: chat,
     },
   };
 }

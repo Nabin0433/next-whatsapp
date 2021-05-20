@@ -1,11 +1,23 @@
+import { useRef, useState } from "react";
+import firebase from "firebase";
 import { Avatar, IconButton } from "@material-ui/core";
-import { AttachFile, InsertEmoticon, MoreVert } from "@material-ui/icons";
+import {
+  AttachFile,
+  InsertEmoticon,
+  MoreVert,
+  Mic,
+  Camera,
+} from "@material-ui/icons";
+import TimeAgo from "timeago-react";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
 import { auth, db } from "../helpers/firebase";
-const ChatScreen = () => {
+import Message from "./Message";
+import getRecipientEmail from "../helpers/getRecipientEmail";
+const ChatScreen = ({ chat, messages }) => {
+  const EndOfMessageRef = useRef(null);
   const [user] = useAuthState(auth);
   const router = useRouter();
   const [messageSnapshot] = useCollection(
@@ -13,32 +25,89 @@ const ChatScreen = () => {
       .collection("chats")
       .doc(router.query.id)
       .collection("messages")
-      .orderBy("timestamp", "asc")
+      .orderBy("lastSeen", "asc")
   );
+
+  const [recipientSnapshot] = useCollection(
+    db
+      .collection("users")
+      ?.where("email", "==", getRecipientEmail(chat.users, user))
+  );
+
+  const [input, setInput] = useState("");
 
   const showMessage = () => {
     if (messageSnapshot) {
-      return messageSnapshot.docs.map((message) => (
+      return messageSnapshot?.docs.map((message) => (
         <Message
           key={message.id}
-          id={message.id}
+          // user={message.data().user}
           user={message.data().user}
           message={{
             ...message.data(),
-            timestamp: message.timestamp?.toDate().getTime(),
+            timestamp: message.data().timestamp?.toDate().getTime(),
           }}
         />
       ));
+    } else {
+      return JSON.parse(messages).map((message) => (
+        <Message key={message.id} user={message.user} message={message} />
+      ));
     }
+  };
+
+  const recipient = recipientSnapshot?.docs?.[0]?.data();
+
+  const getRecipienEmail = getRecipientEmail(chat?.users, user);
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    db.collection("users").doc(user.uid).set(
+      {
+        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+    db.collection("chats").doc(router.query.id).collection("messages").add({
+      lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      message: input,
+      user: user.email,
+      photoUrl: user.photoURL,
+    });
+    setInput("");
+    scrollToBottom();
+  };
+
+  const scrollToBottom = () => {
+    EndOfMessageRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   return (
     <Container>
       <Header>
-        <Avatar />
+        {recipient ? (
+          <Avatar src={recipient?.photoUrl} />
+        ) : (
+          <Avatar>{getRecipienEmail?.[0]}</Avatar>
+        )}
         <HeaderInfo>
-          <h4>email@gdej.com</h4>
-          <p>Lastseen..</p>
+          <h4>{getRecipienEmail}</h4>
+          {recipientSnapshot ? (
+            <p>
+              Last active :{" "}
+              {recipient?.lastSeen?.toDate() ? (
+                <TimeAgo datetime={recipient?.lastSeen?.toDate()} />
+              ) : (
+                "Unabileable"
+              )}{" "}
+            </p>
+          ) : (
+            <p> Loading ....</p>
+          )}
         </HeaderInfo>
         <HeaderIcon>
           <IconButton>
@@ -51,11 +120,22 @@ const ChatScreen = () => {
       </Header>
       <MessageContainer>
         {showMessage()}
-        <EndOfMessage />
+        <EndOfMessage ref={EndOfMessageRef} />
       </MessageContainer>
       <InputContanier>
-        <InsertEmoticon />
-        <Input />
+        <IconButton>
+          <InsertEmoticon />
+        </IconButton>
+        <Input value={input} onChange={(e) => setInput(e.target.value)} />
+        <button type="submit" onClick={sendMessage} hidden disabled={!input}>
+          Send Massage
+        </button>
+        <IconButton>
+          <Camera />
+        </IconButton>
+        <IconButton>
+          <Mic />
+        </IconButton>
       </InputContanier>
     </Container>
   );
@@ -91,11 +171,33 @@ const HeaderInfo = styled.div`
 
 const HeaderIcon = styled.div``;
 
-const MessageContainer = styled.div``;
+const MessageContainer = styled.div`
+  padding: 30px;
+  background-color: #e5ded8;
+  min-height: 90vh;
+`;
 
-const EndOfMessage = styled.div``;
+const EndOfMessage = styled.div`
+  margin-bottom: 50px;
+`;
 
-const InputContanier = styled.div``;
+const InputContanier = styled.form`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 999;
+`;
 
-
-const Input = styled.div``;
+const Input = styled.input`
+  flex: 1;
+  padding: 20px;
+  background-color: whitesmoke;
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  margin-left: 15px;
+  margin-right: 15px;
+`;

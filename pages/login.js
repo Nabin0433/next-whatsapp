@@ -5,14 +5,13 @@ import { auth, provider } from "../helpers/firebase";
 
 const Login = () => {
   const signIn = () => {
-    console.log("hh");
     auth.signInWithPopup(provider).catch(alert);
   };
 
   return (
     <Container>
       <Head>
-        <title>Login page</title>
+        <title>Watsapp Login</title>
       </Head>
       <LoginContainer>
         <Logo
@@ -20,7 +19,7 @@ const Login = () => {
           alt="Logo"
         />
         <Button onClick={signIn} variant="outlined">
-          sign with google
+          Login With Google
         </Button>
       </LoginContainer>
     </Container>
